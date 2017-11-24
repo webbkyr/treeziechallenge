@@ -2,6 +2,9 @@
 
 const { DATABASE } = require('./config');
 const knex = require('knex')(DATABASE);
+const Treeize = require('treeize');
+
+const tree = new Treeize();
 
 // clear the console before each run
 process.stdout.write('\x1Bc');
@@ -11,21 +14,29 @@ process.stdout.write('\x1Bc');
 
 
 
-// knex
-//   .select('id', 'name')
-//   // .count('restaurants')
-//   .from('restaurants')
-//   .where({'cuisine': 'Italian'})
-//   .whereIn('address_zipcode', ['10012', '10013', '10014'])
-//   .orderBy('name', 'asc')
-//   .limit(5)
-//   .debug(false)
-//   // .then(results => console.log(results));
+knex
+  .select('restaurants.id', 'name', 'cuisine as details:cuisine', 'borough as details:borough', 'grades.id as grades:id', 'grades as grades:grade', 'score as grades:score')
+  // .count('restaurants')
+  .from('restaurants')
+  .innerJoin('grades', 'restaurants.id', 'grades.restaurant_id')
+  .where({'cuisine': 'Italian'})
+  // .whereIn('address_zipcode', ['10012', '10013', '10014'])
+  .orderBy('name', 'asc')
+  .limit(5)
+  .debug(false)
+  // .then(results => console.log(results));
+  .then(results => {
+    console.log('BEFORE', JSON.stringify(results, null, 1));
+    tree.grow(results);
+    console.log('AFTER', JSON.stringify(tree.getData(), null, 1));
+  
+  });
+
 
 // knex
 //   .insert(
 //     [{name: 'Bite Cafe',
-//       borough: 'Brooklyn', 
+//       borough: 'Bnodrooklyn', 
 //       cuisine: 'coffee', 
 //       address_building_number: '123',
 //       address_street: 'Atlantic Avenue', 
@@ -118,8 +129,8 @@ knex
           score: item.score
         });
     });
-    console.log(restaurants);
-    console.log(JSON.stringify(hydrated, null, 1));
+    // console.log(restaurants);
+    // console.log(JSON.stringify(hydrated, null, 1));
   });
 // for (let itemizer in restaurants) //for finiding the index
 // for (let itemizer of restaurants) //for finiding the data inside
